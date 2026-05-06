@@ -22,5 +22,5 @@ always_ff @(posedge clk) begin
     end
 end
 // read data from memory at the given address
-assign data_r = memory[addr[9:2]]; 
+assign data_r = memory[addr[9:2]];
 endmodule

@@ -1,16 +1,11 @@
 `timescale 1ns/1ps
 // system on chip integration
-// instruction bus, data bus, inputs outputs, write in riscv_top.sv
-module riscv_top (
+// instruction bus, data bus, inputs outputs
+module core (
     input logic clk,
     input logic reset,
-    // instruction bus I/O
-    input logic [31:0] instruction_data,
-    output logic [31:0] instruction_addr,
-    // data bus I/O
-    output logic [31:0] data_addr,
-    output logic [31:0] write_enable,
-    output logic [31:0] byte_enable
+    input logic [31:0] inst_mem_out,
+    output logic [31:0] pc_out
 );
 
 // SIGNALS
