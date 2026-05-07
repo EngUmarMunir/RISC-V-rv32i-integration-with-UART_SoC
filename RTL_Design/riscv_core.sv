@@ -1,16 +1,21 @@
 `timescale 1ns/1ps
 // system on chip integration
 // instruction bus, data bus, inputs outputs
-module core (
+module riscv_core (
     input logic clk,
     input logic reset,
     input logic [31:0] inst_mem_out,
-    output logic [31:0] pc_out
+    input logic [31:0] data_r,
+    output logic [31:0] pc_out,
+    output logic [31:0] data_addr,
+    output logic [31:0] data_w,
+    output logic mem_write_en
 );
 
 // SIGNALS
-logic [31:0] pc_out, next_pc;
+logic [31:0] next_pc;
 logic [31:0] instruction;
+logic [6:0] opcode;
 
 logic [4:0] rs1, rs2, rd;
 logic [31:0] read_data1, read_data2;
@@ -24,7 +29,6 @@ logic [31:0] ImmExt;
 logic [31:0] alu_result;
 logic zero;
 
-logic [31:0] mem_data;
 logic [31:0] write_back_data;
 
 logic branch_taken;
@@ -36,6 +40,12 @@ logic [31:0] lsu_load_data;
 logic [31:0] lsu_store_data;
 logic [3:0]  lsu_funct;
 
+assign instruction = inst_mem_out;
+assign opcode = instruction[6:0];
+assign data_addr = alu_result;
+assign data_w = lsu_store_data;
+assign mem_write_en = MemWrite;
+
 // FIELD EXTRACTION
 assign rs1 = instruction[19:15];
 assign rs2 = instruction[24:20];
@@ -44,7 +54,9 @@ assign rd  = instruction[11:7];
 assign lsu_funct = {MemWrite, instruction[14:12]};
 
 // ALU INPUTS
-assign alu_src_a = (instruction[6:0] == 7'b0010111) ? pc_out : read_data1;
+assign alu_src_a = (opcode == 7'b0010111) ? pc_out :
+                   (opcode == 7'b0110111) ? 32'b0 :
+                   read_data1;
 assign alu_src_b = ALUSrc ? ImmExt : read_data2;
 
 // PC LOGIC
@@ -115,7 +127,7 @@ alu alu_inst (
 // LSU (FIXED)
 load_store_unit lsu (
     .funct(lsu_funct),
-    .mem_in(mem_data),
+    .mem_in(data_r),
     .reg_in(read_data2),
     .load_data(lsu_load_data),
     .store_data(lsu_store_data)
