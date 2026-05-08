@@ -41,7 +41,7 @@ end
 
 data_mem data_memory (
     .clk(clk),
-    .rest(reset),
+    .reset(reset),
     .addr(addr),
     .data_w(write_data),
     .mem_write_en(data_mem_write_en),
